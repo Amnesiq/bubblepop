@@ -5,4 +5,5 @@ import matthieuimbert.bubblepop.model.Bubble;
 
 public interface Observer {
 	  public void update(List<Bubble> bubbles);
+	  public void update(long score);
 }

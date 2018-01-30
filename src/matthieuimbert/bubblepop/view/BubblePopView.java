@@ -18,6 +18,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 import matthieuimbert.bubblepop.controler.AbstractControler;
@@ -28,8 +29,8 @@ public class BubblePopView implements Observer {
 
 	private final int WINDOW_WIDTH = 450; //largeur
 	private final int WINDOW_HEIGHT = 300; //hauteur
-	private final int BUTTON_WIDTH = 50; //largeur
-	private final int BUTTON_HEIGHT = 50; //hauteur
+	private final int BUTTON_WIDTH = 25; //largeur
+	private final int BUTTON_HEIGHT = 25; //hauteur
 	
     private Shell shell;
     private Display display;
@@ -37,14 +38,18 @@ public class BubblePopView implements Observer {
     
     private AbstractControler controler;
     
-    private ButtonSelectionAdapter buttonSa = new ButtonSelectionAdapter();
+    private GreenButtonSelectionAdapter greenButtonSa = new GreenButtonSelectionAdapter();
+    private RedButtonSelectionAdapter redButtonSa = new RedButtonSelectionAdapter();
+    
+    private String score;
+    private long startTime;
     
     public BubblePopView(AbstractControler controler) {
     	this.controler=controler;
 		display = new Display();
 		shell = new Shell(display,SWT.SHELL_TRIM & (~SWT.RESIZE));
         resManager = new LocalResourceManager(JFaceResources.getResources(), shell);
-		shell.setText("BubblePop");
+		shell.setText("BubblePop : 0");
 		FormLayout layout= new FormLayout ();
         shell.setLayout(layout);
         Dimension screen = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
@@ -55,7 +60,8 @@ public class BubblePopView implements Observer {
 		for(Control kid : shell.getChildren()){
 			kid.dispose();
 		}
-        generateButtons(bubbles);
+		generateButtons(bubbles);
+		startTime = System.currentTimeMillis();
         shell.layout();
 	}
 	
@@ -63,7 +69,6 @@ public class BubblePopView implements Observer {
 		List<FormData> fdList = new ArrayList<FormData>();
 		for(Bubble b : bubbles) {
 	        Button button =  new Button(shell, SWT.PUSH);
-			button.addSelectionListener(buttonSa);
 			// Placement et non chevauchement des boutons
 			FormData formData = new FormData(BUTTON_WIDTH,BUTTON_HEIGHT);
 			do {
@@ -79,16 +84,21 @@ public class BubblePopView implements Observer {
 	        fdList.add(formData);
 			// Style du bouton
 			RGB rgb = new RGB(0,0,0);
-			if(b.getCouleur().equalsIgnoreCase("Verte")) {
+			switch(b.getCouleur()) {
+			case "Verte":
 				rgb.red=34;
 				rgb.green=139;
 				rgb.blue=34;
-			}
-			else if(b.getCouleur().equalsIgnoreCase("Rouge"))
-			{
+				button.addSelectionListener(greenButtonSa);
+				break;
+			case "Rouge":
 				rgb.red=205;
 				rgb.green=38;
 				rgb.blue=38;
+				button.addSelectionListener(redButtonSa);
+				break;
+			default:
+				break;
 			}
 	        Color color = resManager.createColor(rgb);
 	        // Creation et configuration du bouton
@@ -118,8 +128,16 @@ public class BubblePopView implements Observer {
 		controler.init();
 	}
 	
-	private void defeat() {
-		shell.dispose();
+	private void end(String reason) {
+		MessageBox m = new MessageBox(shell, SWT.YES | SWT.NO);
+		m.setMessage(reason+"\n"
+				+ "Score : "+score+"\n"
+				+ "Voulez vous rejouer ?");
+		int choice = m.open();
+		if(choice==SWT.NO)
+			shell.dispose();
+		if(choice==SWT.YES)
+			init();
 	}
 	
 	public void run() {
@@ -137,19 +155,33 @@ public class BubblePopView implements Observer {
 	@Override
 	public void update(List<Bubble>bubbles) {
 		if(bubbles==null)
-			defeat();
+			end("Fin de la partie");
 		else
 			refreshWindow(bubbles);
 	}
 	
-	class ButtonSelectionAdapter extends SelectionAdapter {
+	@Override
+	public void update(long score) {
+		this.score = Long.toString(score);
+		shell.setText("BubblePop : "+ this.score);
+	}
+	
+	class GreenButtonSelectionAdapter extends SelectionAdapter {
 		@Override
 		public void widgetSelected(SelectionEvent e) {
 			Object o = e.getSource();
 			if (o instanceof Button) {
 				Button b = (Button) o;
-				controler.addChoice(b.getText());
+				controler.setAcquiredPoints(100000/(System.currentTimeMillis()-startTime));
+				controler.setChoice(b.getText());
 			}
+		}
+	}
+	
+	class RedButtonSelectionAdapter extends SelectionAdapter {
+		@Override
+		public void widgetSelected(SelectionEvent e) {
+			end("Vous avez perdu!");
 		}
 	}
 

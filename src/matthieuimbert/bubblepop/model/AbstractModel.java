@@ -6,11 +6,12 @@ import java.util.List;
 import matthieuimbert.bubblepop.observer.Observer;
 
 public abstract class AbstractModel {
-	protected List<String> choices = new ArrayList<String>();
-	protected List<String> greenBubblesId = new ArrayList<String>();
-	protected List<Bubble> bubbles = new ArrayList<Bubble>();
+	protected final int GAME_END_NBGREEN = 10;
+	
+	protected List<Bubble> bubbles;
 	protected int lastIndex;
-	protected int score;
+	protected int nbGreen;
+	protected long score;
 	private ArrayList<Observer> listObserver = new ArrayList<Observer>();
 	
 	public abstract void init();
@@ -19,9 +20,17 @@ public abstract class AbstractModel {
 	
 	public abstract void generateBubbles();
 	
-	public abstract void addChoice(String choice);
+	public abstract boolean removeBubbleFromId(int id);
 	
-	public abstract void matchingChoices();
+	public abstract Bubble getBubbleFromId(int id);
+	
+	public abstract int firstGreenBubbleIndex();
+	
+	public abstract void updateScore(long points);
+	
+	public List<Bubble> getBubbles(){
+		return this.bubbles;
+	}
 	
 	  //Implémentation du pattern observer
 	public void addObserver(Observer obs) {
@@ -33,7 +42,13 @@ public abstract class AbstractModel {
 	      obs.update(bubbles);
 	  }
 	
+	public void notifyObserver(long score) {
+		for(Observer obs : listObserver)
+		      obs.update(score);
+	}
+	
 	public void removeObserver() {
 	    listObserver = new ArrayList<Observer>();
-	  }  
+	  }
+	
 }
