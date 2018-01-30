@@ -6,7 +6,7 @@ import java.util.List;
 import matthieuimbert.bubblepop.observer.Observer;
 
 public abstract class AbstractModel {
-	protected final int GAME_END_NBGREEN = 10;
+	protected final int GAME_END_NBGREEN = 50;
 	
 	protected List<Bubble> bubbles;
 	protected int lastIndex;
