@@ -23,7 +23,7 @@ public class BubblePop extends AbstractModel {
 	@Override
 	public void generateBubbles() {
 		bubbles.clear();
-		int nbBubble = 10;
+		int nbBubble = 25;
 		int i = lastIndex;
 		if(nbGreen<GAME_END_NBGREEN) {
 			while(nbGreen<GAME_END_NBGREEN && i<nbBubble+lastIndex ) {

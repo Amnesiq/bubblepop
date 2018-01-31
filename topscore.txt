@@ -1,4 +1,4 @@
-Top score :
+Top score v1.0:
 
 Antoine B : 2153
 GY : 3226, 3745
@@ -7,3 +7,7 @@ Peri : 1654
 Jaja : 1688
 PA: 2054, 3080, 2927
 Adam : 2249, 2514,2650,2967
+
+Top Score v1.3:
+
+GY : 5487
